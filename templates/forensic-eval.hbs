@@ -1,0 +1,85 @@
+<h1>{{project.name}} - {{project.projectType}}</h1>
+<p><strong>Inspection Date:</strong> {{project.inspectionDate}}</p>
+<p><strong>Site Name:</strong> {{project.siteName}}</p>
+<p><strong>Site Address:</strong> {{project.siteAddress}}</p>
+<p><strong>Client:</strong> {{project.clientName}}</p>
+<p><strong>Inspector:</strong> {{project.inspectorName}}</p>
+
+<hr />
+
+{{#if project.coverPhotoUri}}
+  <h2>Cover Photo</h2>
+  <img src="{{project.coverPhotoUri}}" style="width:100%;max-width:600px;height:auto;border:1px solid #ccc;" alt="Cover Photo"/>
+{{/if}}
+
+<hr />
+
+<h2>Site Description</h2>
+<p>{{project.siteDescriptionText}}</p>
+
+<hr />
+
+<h2>Scope of Evaluation</h2>
+<p>{{project.scopeOfEvaluationText}}</p>
+
+<hr />
+
+<h2>Observations</h2>
+{{#if project.observations}}
+  {{#each project.observations}}
+    <div>
+      <h3>{{this.title}}</h3>
+      <p><strong>Note:</strong> {{this.content}}</p>
+      {{#if this.imageUri}}
+        <img src="{{this.imageUri}}" style="max-width:400px;max-height:300px;height:auto;border:1px solid #ccc;" alt="Observation Image"/>
+      {{else}}
+        <p><em>No image for this observation.</em></p>
+      {{/if}}
+    </div>
+    <hr />
+  {{/each}}
+{{else}}
+  <p>No observations recorded.</p>
+{{/if}}
+
+<hr />
+
+<h2>Recommendations</h2>
+{{#if project.recommendations}}
+  <ul>
+  {{#each project.recommendations}}
+    <li>{{this.text}}</li>
+  {{/each}}
+  </ul>
+{{else}}
+  <p>No recommendations provided.</p>
+{{/if}}
+
+<hr />
+
+<h2>Conclusions</h2>
+<p>{{project.conclusionsText}}</p>
+
+<style>
+  body {
+    font-family: sans-serif;
+    margin: 20px;
+    line-height: 1.6;
+  }
+  h1, h2, h3 {
+    color: #333;
+  }
+  hr {
+    border: 0;
+    height: 1px;
+    background: #eee;
+    margin: 20px 0;
+  }
+  img {
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+  ul {
+    padding-left: 20px;
+  }
+</style> 
