@@ -1,0 +1,34 @@
+{
+  "cli": {
+    "version": ">= 7.6.0"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "environment": "development",
+      "env": {},
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {
+        "simulator": true
+      },
+      "channel": "development"
+    },
+    "preview": {
+      "distribution": "internal",
+      "environment": "preview",
+      "env": {},
+      "channel": "preview"
+    },
+    "production": {
+      "environment": "production",
+      "env": {},
+      "channel": "production"
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+} 

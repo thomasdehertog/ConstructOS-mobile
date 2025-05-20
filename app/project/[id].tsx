@@ -155,22 +155,21 @@ const ProjectDetailsSection: React.FC<ProjectDetailsSectionProps> = ({ projectId
     setIsEditing(false);
   };
 
-  // Render a styled detail item
-  const renderDetailItem = (label: string, value: string) => (
-    <View style={styles.detailItem} key={label}>
-      <Text style={styles.detailItemLabel}>{label}</Text>
-      <Text style={styles.detailItemValue}>{value || "-"}</Text>
-    </View>
-  );
-
   return (
     <View style={styles.detailsContainer}> 
+      {/* The header for 'Project Details' title and edit/share/download icons is now REMOVED from here */}
+      {/* It will be part of the main screen scrolling content if desired, or actions moved to main header */}
+      
       {isEditing ? (
         <View style={styles.editDetailsForm}>
+          {/* Edit/Share/Download icons could be conditionally rendered here if needed in edit mode */}
           <View style={styles.detailsActionsOnTopInEdit}>
             <TouchableOpacity onPress={() => setIsEditing(false)} style={styles.actionIcon} disabled={isSaving}>
+              {/* Using a general 'close' or 'cancel' icon might be more appropriate than Edit icon here */}
+              {/* For now, let's assume cancel is handled by the bottom Cancel button */}
               <Text />
             </TouchableOpacity>
+             {/* Placeholder for Share and Download if they are to be kept in edit mode */}
           </View>
 
           {(Object.keys(formData) as Array<keyof ProjectDetailsData>).map((key) => (
@@ -204,27 +203,24 @@ const ProjectDetailsSection: React.FC<ProjectDetailsSectionProps> = ({ projectId
         </View>
       ) : (
         <View style={styles.detailsContent}>
+           {/* Display Edit/Share/Download icons when NOT editing */}
           <View style={styles.detailsHeaderRowNonEditing}>
-            <View style={styles.projectTypeBadge}>
-              <Text style={styles.projectTypeBadgeText}>{formData.projectType || "Project"}</Text>
-            </View>
+            <Text style={styles.currentSectionTitle}>Details</Text> {/* Or keep it empty if ProjectDetails implies this section*/}
             <View style={styles.detailsActions}>
               <TouchableOpacity onPress={() => setIsEditing(true)} style={styles.actionIcon} disabled={isSaving}>
-                <Edit stroke={"#1E6FFF"} width={22} height={22} />
+                <Edit stroke={"#000"} width={22} height={22} />
               </TouchableOpacity>
-              <TouchableOpacity style={styles.actionIcon}><Share2 stroke="#1E6FFF" width={22} height={22} /></TouchableOpacity>
+              <TouchableOpacity style={styles.actionIcon}><Share2 stroke="#000" width={22} height={22} /></TouchableOpacity>
+              <TouchableOpacity style={styles.actionIcon}><Download stroke="#000" width={22} height={22} /></TouchableOpacity>
             </View>
           </View>
 
-          <View style={styles.detailsListContainer}>
-            {renderDetailItem("Project ID", String(Array.isArray(projectId) ? projectId.join(", ") : projectId ?? ''))}
-            {(Object.keys(formData) as Array<keyof ProjectDetailsData>).map((key) => 
-              renderDetailItem(
-                key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase()),
-                String(formData[key] ?? "")
-              )
-            )}
-          </View>
+          <Text style={styles.detailsText}>Project ID: {String(Array.isArray(projectId) ? projectId.join(", ") : projectId ?? '')}</Text>
+          {(Object.keys(formData) as Array<keyof ProjectDetailsData>).map((key) => (
+            <Text style={styles.detailsText} key={key}>
+              {`${key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}: ${String(formData[key] ?? "Not set")}`}
+            </Text>
+          ))}
         </View>
       )}
     </View>
@@ -960,45 +956,31 @@ export default function ProjectDetailScreen() {
     <View style={styles.observationItem}>
       <View style={styles.observationHeader}>
         <Text style={styles.observationTitle}>{item.title}</Text>
-        <TouchableOpacity onPress={() => removeObservation(item.id)} style={styles.removeButton}>
+        <TouchableOpacity onPress={() => removeObservation(item.id)}>
           <Trash2 stroke="#FF3B30" width={20} height={20} />
         </TouchableOpacity>
       </View>
       <Text style={styles.observationContent}>{item.content}</Text>
-      
       {item.imageUri && (
-        <View style={styles.imageContainer}>
-          <Image source={{ uri: item.imageUri }} style={styles.observationImage} />
-          <View style={styles.captionContainer}>
-            <Text style={styles.captionText}>+ Caption (optional)</Text>
-          </View>
-        </View>
+        <Image source={{ uri: item.imageUri }} style={styles.observationImage} />
       )}
-      
       <View style={styles.buttonRow}>
-        <TouchableOpacity 
-          style={styles.actionButtonFullWidth} 
-          onPress={() => pickImageAsync().then(asset => setObservationImageUri(item.id, asset?.uri || ""))}
-        >
+        <TouchableOpacity style={styles.actionButtonFullWidth} onPress={() => pickImageAsync().then(asset => setObservationImageUri(item.id, asset?.uri || ""))}>
           <UploadCloud stroke="#fff" width={18} height={18} style={{marginRight: 5}} />
           <Text style={styles.actionButtonText}>Upload Photo</Text>
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.actionButtonFullWidth} 
-          onPress={() => takePhotoAsync().then(asset => setObservationImageUri(item.id, asset?.uri || ""))}
-        >
+        <TouchableOpacity style={styles.actionButtonFullWidth} onPress={() => takePhotoAsync().then(asset => setObservationImageUri(item.id, asset?.uri || ""))}>
           <Camera stroke="#fff" width={18} height={18} style={{marginRight: 5}} />
           <Text style={styles.actionButtonText}>Take Photo</Text>
         </TouchableOpacity>
       </View>
-      
       <View style={styles.buttonRow}>
         <TouchableOpacity style={styles.actionButtonFullWidth} onPress={() => toggleNoteInput(item.id)}>
           <Text style={styles.actionButtonText}>Type Note</Text>
         </TouchableOpacity>
         <TouchableOpacity 
           style={[
-            styles.actionButtonOutline, 
+            styles.actionButtonFullWidth, 
             isRecording && recordingForObservationId === item.id && styles.recordingActiveButton
           ]} 
           onPress={() => {
@@ -1010,16 +992,15 @@ export default function ProjectDetailScreen() {
           }}
         >
           {isRecording && recordingForObservationId === item.id ? (
-            <StopCircle stroke="#1E6FFF" width={18} height={18} style={{marginRight: 5}} />
+            <StopCircle stroke="#fff" width={18} height={18} style={{marginRight: 5}} />
           ) : (
-            <Mic stroke="#1E6FFF" width={18} height={18} style={{marginRight: 5}} />
+            <Mic stroke="#fff" width={18} height={18} style={{marginRight: 5}} />
           )}
-          <Text style={styles.actionButtonOutlineText}>
+          <Text style={styles.actionButtonText}>
             {isRecording && recordingForObservationId === item.id ? "Stop Recording" : "Speak Note"}
           </Text>
         </TouchableOpacity>
       </View>
-      
       {item.audioUri && (
         <View style={styles.audioPlayerContainer}>
           <Text style={styles.audioPlayerText}>Recorded Note:</Text>
@@ -1029,7 +1010,6 @@ export default function ProjectDetailScreen() {
           </TouchableOpacity>
         </View>
       )}
-      
       {item.showNoteInput && (
         <View style={styles.noteInputContainer}>
           <TextInput
@@ -1044,72 +1024,8 @@ export default function ProjectDetailScreen() {
           </TouchableOpacity>
         </View>
       )}
-      
-      {isTranscribing && recordingForObservationId === item.id && (
-        <Text style={styles.transcribingText}>Transcribing note...</Text>
-      )}
     </View>
   );
-    
-  // Add these updated styles
-  const styles = StyleSheet.create({
-    // ... existing styles ...
-    
-    observationItem: {
-      marginBottom: 24,
-      borderBottomWidth: 1,
-      borderBottomColor: '#F3F4F6',
-      paddingBottom: 16,
-      backgroundColor: '#FFFDF5', // Light amber background for observations
-      borderRadius: 8,
-      padding: 12,
-    },
-    removeButton: {
-      padding: 5,
-    },
-    imageContainer: {
-      position: 'relative',
-      marginBottom: 12, 
-      borderRadius: 8,
-      overflow: 'hidden',
-    },
-    captionContainer: {
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      padding: 5,
-    },
-    captionText: {
-      color: 'white',
-      fontSize: 12,
-      textAlign: 'center',
-    },
-    actionButtonOutline: {
-      flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: 1,
-      borderColor: '#1E6FFF',
-      backgroundColor: "transparent",
-      paddingVertical: 12,
-      borderRadius: 20,
-    },
-    actionButtonOutlineText: {
-      color: "#1E6FFF",
-      fontWeight: "600",
-      fontSize: 15,
-    },
-    transcribingText: {
-      color: '#6B7280',
-      fontSize: 14,
-      fontStyle: 'italic',
-      marginTop: 8,
-    },
-    // ... rest of styles ...
-  });
 
   // Callback for ProjectDetailsSection to update parent state
   const handleProjectDetailsSave = (updatedData: ProjectDetailsData) => {
@@ -1497,18 +1413,6 @@ export default function ProjectDetailScreen() {
     return null; // Should not happen if data is structured correctly
   };
   
-  // Render section headers for SectionList
-  const renderSectionHeader = ({ section }: { section: Section }) => (
-    <TouchableOpacity onPress={() => toggleSection(section.key)} style={styles.sectionHeader}>
-      <Text style={styles.sectionTitle}>{section.title}</Text>
-      {expandedSections[section.key] ? (
-        <ChevronUp stroke="#1E6FFF" width={24} height={24} />
-      ) : (
-        <ChevronDown stroke="#1E6FFF" width={24} height={24} />
-      )}
-    </TouchableOpacity>
-  );
-  
   // Main component render
   return (
     <SafeAreaView style={styles.container}>
@@ -1517,36 +1421,47 @@ export default function ProjectDetailScreen() {
           headerTitle: projectData?.name || "Loading Project...",
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.back()} style={{ paddingLeft: 10 }}>
-              <ChevronLeft stroke="#1E6FFF" width={28} height={28} />
+              <ChevronLeft stroke="#007AFF" width={28} height={28} />
             </TouchableOpacity>
           ),
           headerRight: () => (
             <TouchableOpacity onPress={() => {/* Navigate to settings or similar */}} style={{ paddingRight: 10 }}>
-              <Settings stroke="#1E6FFF" width={24} height={24} />
+              <Settings stroke="#007AFF" width={24} height={24} />
             </TouchableOpacity>
           ),
         }}
       />
       <SectionList
-        style={{ flex: 1 }}
+        style={{ flex: 1 }} // Ensures SectionList takes available space
         sections={sectionsData}
         keyExtractor={(item, index) => {
           if (typeof item === 'object' && item && 'id' in item && typeof (item as any).id === 'string') {
             return (item as any).id + index;
           }
+          // For static content or action items, ensure their IDs are unique strings or use index
           if (typeof item === 'object' && item && 'id' in item && typeof (item as any).id === 'string' && (item as any).type) {
              return (item as any).type + '-' + (item as any).id;
           }
           return String(index);
         }}
         renderItem={renderSectionListItem}
-        renderSectionHeader={renderSectionHeader}
+        renderSectionHeader={({ section }) => (
+          <TouchableOpacity onPress={() => toggleSection(section.key)} style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>{section.title}</Text>
+            {expandedSections[section.key] ? (
+              <ChevronUp stroke="#2D74FF" width={24} height={24} />
+            ) : (
+              <ChevronDown stroke="#2D74FF" width={24} height={24} />
+            )}
+          </TouchableOpacity>
+        )}
         ListHeaderComponent={<ListHeader />}
         ListFooterComponent={<ListFooter />}
         stickySectionHeadersEnabled={false}
+        // extraData is used to tell SectionList to re-render when these state values change.
+        // We need to include all state that affects rendering of items or headers.
         extraData={{expandedSections, observationsLength: observations.length, projectDetails, isRecording, recordingForObservationId, isGenericRecording, genericRecordingSectionKey, isTranscribing}}
-        ListEmptyComponent={null}
-        contentContainerStyle={{padding: 16}} // Add padding around entire list
+        ListEmptyComponent={null} // No global empty component, sections handle their own empty state via `data`
       />
 
       {/* Area Modal */}
@@ -1643,13 +1558,14 @@ export default function ProjectDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F9FF", // Updated to light blue background from design
+    backgroundColor: "#FFFFFF",
   },
+  // New header styles
   headerContainer: {
     backgroundColor: "white",
     paddingHorizontal: 16, 
-    paddingTop: Platform.OS === 'ios' ? 10 : 15,
-    paddingBottom: 15,
+    paddingTop: Platform.OS === 'ios' ? 10 : 15, // Adjusted top padding for status bar
+    paddingBottom: 15, // Padding below the main title
     borderBottomWidth: 1,
     borderBottomColor: "#e0e0e0",
   },
@@ -1657,17 +1573,29 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 10, // Space between top row and main title
   },
   mainScreenTitle: {
     fontSize: 28, 
     fontWeight: "bold",
-    color: "#0F1A4A", // Updated to match design
+    color: "#111827",
+    // textAlign: 'left', // Default for Text, but explicit if needed
   },
-  headerTitle: {
+  // Old header style (can be removed or refactored if no longer used elsewhere)
+  /* header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: Platform.OS === 'android' ? 12 : 10,
+    backgroundColor: "white",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e0e0e0",
+  }, */
+  headerTitle: { // This was for the old centered title, can be removed or repurposed if needed
     fontSize: 20,
     fontWeight: "bold",
-    color: "#0F1A4A", // Updated to match design
+    color: "#111827",
   },
   headerRight: {
     flexDirection: "row",
@@ -1689,44 +1617,38 @@ const styles = StyleSheet.create({
   },
   detailsContainer: {
     paddingHorizontal: 16,
-    paddingTop: 0,
+    paddingTop: 0, // Reduced top padding as the title is removed
     paddingBottom: 20,
     backgroundColor: "white",
-    borderRadius: 12, // Added rounded corners from design
-    marginBottom: 16, // Added spacing
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
+    // Removed borderBottomWidth and borderBottomColor, will be handled by SectionList's sectionHeader border
   },
-  detailsHeader: {
+  detailsHeader: { // This style is no longer used for the main title of ProjectDetailsSection
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 16,
   },
-  detailsTitle: {
+  detailsTitle: { // This style is no longer used for "Project Details" text
     fontSize: 22,
     fontWeight: "bold",
-    color: "#0F1A4A", // Updated to match design
+    color: "#111827",
   },
-  detailsActionsOnTopInEdit: {
+  detailsActionsOnTopInEdit: { // Style for potential icons if needed in edit mode at the top
     flexDirection: 'row',
     justifyContent: 'flex-end',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 10, // Add some space if icons are present
   },
   detailsHeaderRowNonEditing: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 16, // Existing margin
   },
   currentSectionTitle: {
-    fontSize: 20,
+    fontSize: 20, // Title for the current section if needed e.g. "Details"
     fontWeight: 'bold',
-    color: '#0F1A4A', // Updated to match design
+    color: '#111827',
   },
   detailsActions: {
     flexDirection: "row",
@@ -1739,9 +1661,9 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   detailsText: {
-    fontSize: 15,
+    fontSize: 17,
     marginBottom: 10,
-    color: "#0F1A4A", // Updated to match design
+    color: "#374151",
     lineHeight: 24,
   },
   editDetailsForm: {
@@ -1751,15 +1673,15 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   label: {
-    fontSize: 13,
+    fontSize: 15,
     marginBottom: 6,
-    color: "#6B7280", // Lighter label text color from design
+    color: "#4B5563",
     fontWeight: '500',
   },
   input: {
     borderWidth: 1,
     borderColor: "#D1D5DB",
-    borderRadius: 8, // Increased roundness
+    borderRadius: 6,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 16,
@@ -1775,14 +1697,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 10,
     paddingHorizontal: 18,
-    borderRadius: 20, // Updated to pill shape from design
+    borderRadius: 6,
     marginLeft: 10,
   },
   cancelButton: {
     backgroundColor: "#6B7280",
   },
   saveButton: {
-    backgroundColor: "#1E6FFF", // Updated to match design
+    backgroundColor: "#2D74FF",
   },
   editButtonText: {
     color: "white",
@@ -1796,16 +1718,22 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingVertical: 16,
     paddingHorizontal: 16,
-    backgroundColor: "#F5F9FF", // Updated to match design
+    backgroundColor: "#FFFFFF",
     borderTopWidth: 1,
     borderBottomWidth: 1,
     borderColor: '#eeeeee',
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#0F1A4A", // Updated to match design
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#111827",
     flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: "#2D74FF",
+    paddingVertical: 12,
+    borderRadius: 8,
   },
   sectionContent: {
     padding: 16,
@@ -1816,9 +1744,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#F3F4F6',
     paddingBottom: 16,
-    backgroundColor: '#FFFDF5', // Light amber background for observations
-    borderRadius: 8,
-    padding: 12,
   },
   observationHeader: {
     flexDirection: "row",
@@ -1827,9 +1752,9 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   observationTitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
-    color: "#0F1A4A", 
+    color: "#111827",
     flex: 1,
   },
   observationContent: {
@@ -1837,12 +1762,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: "#4B5563",
     lineHeight: 22,
-  },
-  observationImage: {
-    width: '100%',
-    height: 150,
-    borderRadius: 8,
-    backgroundColor: '#e0e0e0',
   },
   buttonRow: {
     flexDirection: "row",
@@ -1855,9 +1774,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: "#1E6FFF",
+    backgroundColor: "#2D74FF",
     paddingVertical: 12,
-    borderRadius: 20,
+    borderRadius: 8,
   },
   actionButtonText: {
     color: "white",
@@ -1870,28 +1789,28 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   addButtonText: {
-    color: "#1E6FFF", // Updated to match design
+    color: "#2D74FF",
     fontWeight: "bold",
     fontSize: 16,
     marginLeft: 6,
   },
   instructionText: {
-    fontSize: 14,
+    fontSize: 16,
     marginBottom: 16,
-    color: "#6B7280", // Lighter text color from design
-    lineHeight: 22,
+    color: "#4B5563",
+    lineHeight: 23,
   },
   aiButton: {
     borderWidth: 1,
-    borderColor: "#1E6FFF", // Updated to match design
-    borderRadius: 20, // Updated to pill shape from design
+    borderColor: "#D1D5DB",
+    borderRadius: 8,
     paddingVertical: 12,
     alignItems: "center",
     marginTop: 8,
-    backgroundColor: '#FFFFFF'
+    backgroundColor: '#F9FAFB'
   },
   aiButtonText: {
-    color: "#1E6FFF", // Updated to match design
+    color: "#374151",
     fontWeight: '500',
     fontSize: 15,
   },
@@ -1930,7 +1849,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   generateButton: {
-    backgroundColor: "#1E6FFF",
+    backgroundColor: "#2D74FF",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 20,
@@ -1947,7 +1866,7 @@ const styles = StyleSheet.create({
   noteInput: {
     borderWidth: 1,
     borderColor: "#D1D5DB",
-    borderRadius: 8, // Increased roundness
+    borderRadius: 6,
     padding: 12,
     minHeight: 100,
     textAlignVertical: "top",
@@ -1956,9 +1875,9 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   saveNoteButton: {
-    backgroundColor: "#1E6FFF", // Updated to match design
+    backgroundColor: "#2D74FF",
     paddingVertical: 10,
-    borderRadius: 20, // Updated to pill shape from design
+    borderRadius: 6,
     alignItems: "center",
   },
   saveNoteText: {
@@ -1971,6 +1890,14 @@ const styles = StyleSheet.create({
     height: 200,
     borderRadius: 8,
     marginBottom: 16,
+    backgroundColor: '#e0e0e0',
+  },
+  observationImage: {
+    width: '100%',
+    height: 150,
+    borderRadius: 8,
+    marginTop: 8,
+    marginBottom: 12,
     backgroundColor: '#e0e0e0',
   },
   removeImageButton: {
@@ -2094,19 +2021,20 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#1E6FFF", // Updated to match design
+    backgroundColor: "#007AFF", // A common theme color
     paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 20, // Updated to pill shape from design
-    elevation: 2,
-    shadowColor: "#000",
+    borderRadius: 8,
+    elevation: 2, // Android shadow
+    shadowColor: "#000", // iOS shadow
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 1.41,
-    width: '100%',
+    width: '100%', // Make button take full width
   },
   generateReportButton: {
-    backgroundColor: "#1E6FFF", // Updated to match design
+    // specific styles for generate report button if different from a generic actionButton
+    backgroundColor: "#4CAF50", // Green color for generate
   },
   reportLinkContainer: { // New style for the link container
     marginTop: 15,
@@ -2130,34 +2058,6 @@ const styles = StyleSheet.create({
   },
   modalHeaderButton: {
     padding: 8, // Add some padding to make icons easier to tap
-  },
-  detailItem: {
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-  },
-  detailItemLabel: {
-    fontSize: 13,
-    color: '#6B7280',
-    marginBottom: 4,
-  },
-  detailItemValue: {
-    fontSize: 15,
-    color: '#0F1A4A',
-  },
-  projectTypeBadge: {
-    backgroundColor: '#1E6FFF',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-  },
-  projectTypeBadgeText: {
-    color: 'white',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  detailsListContainer: {
-    marginTop: 16,
   },
 }); 
 
